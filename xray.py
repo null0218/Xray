@@ -15,26 +15,17 @@ def check_root():
 
 def update_system():
     print("正在更新系统和安装依赖...")
-    if os.path.exists("/usr/bin/apt-get"):
-        subprocess.run(["apt-get", "update", "-y"])
-        subprocess.run(["apt-get", "upgrade", "-y"])
-        subprocess.run(["apt-get", "install", "-y", "gawk", "curl"])
+    if os.path.exists("/usr/bin/apt"): # Changed from apt-get to apt
+        subprocess.run(["apt", "update", "-y"]) # Changed from apt-get to apt
+        subprocess.run(["apt", "upgrade", "-y"]) # Changed from apt-get to apt
+        subprocess.run(["apt", "install", "-y", "gawk", "curl"]) # Changed from apt-get to apt
     else:
-        subprocess.run(["yum", "update", "-y"])
-        subprocess.run(["yum", "upgrade", "-y"])
-        subprocess.run(["yum", "install", "-y", "epel-release", "gawk", "curl"])
+        subprocess.run(["dnf", "update", "-y"]) # Changed from yum to dnf
+        subprocess.run(["dnf", "upgrade", "-y"]) # Changed from yum to dnf
+        subprocess.run(["dnf", "install", "-y", "epel-release", "gawk", "curl"]) # Changed from yum to dnf
 
-def get_random_ports():
-    used_ports = subprocess.check_output("ss -ltn | awk '{print $4}' | awk -F ':' '{print $NF}'", shell=True).decode().split()
-    used_ports = set(map(int, filter(str.isdigit, used_ports)))
-
-    def generate():
-        while True:
-            p = random.randint(1024, 65000)
-            if p not in used_ports:
-                return p
-
-    return generate(), generate()
+def get_vless_tcp_port():
+    return 25801 # Fixed port for vless-tcp-reality
 
 def install_xray():
     subprocess.run(["curl", "-Lo", "install-release.sh", "https://github.com/XTLS/Xray-install/raw/main/install-release.sh"])
@@ -70,48 +61,29 @@ def get_country(ip):
     except:
         return ""
 
-def write_config(port1, port2, psk_b64, uuid_str, private_key, public_key, path):
+def write_config(port, uuid_str, private_key, public_key): # Modified to only take one port
     config = {
         "log": {"loglevel": "warning"},
         "inbounds": [
             {
-                "port": port1,
-                "protocol": "shadowsocks",
-                "settings": {
-                    "method": "2022-blake3-aes-128-gcm",
-                    "password": psk_b64,
-                    "network": "tcp,udp"
-                }
-            },
-            {
-                "port": port2,
+                "port": port,
                 "protocol": "vless",
                 "settings": {
-                    "clients": [{"id": uuid_str, "flow": ""}],
+                    "clients": [{"id": uuid_str, "flow": "xtls-rprx-vision"}], # Only xtls-rprx-vision for vless-tcp-reality
                     "decryption": "none",
                     "fallbacks": []
                 },
                 "streamSettings": {
-                    "network": "xhttp",
+                    "network": "tcp", # Fixed to tcp
                     "security": "reality",
                     "realitySettings": {
                         "show": False,
-                        "dest": "www.tesla.com:443",
+                        "dest": "www.tesla.com:443", # Retained original dest for consistency
                         "xver": 0,
-                        "serverNames": ["www.tesla.com"],
+                        "serverNames": ["www.tesla.com"], # Retained original serverNames
                         "privateKey": private_key,
-                        "shortIds": ["123abc"],
-                        "fingerprint": "chrome"
-                    },
-                    "xhttpSettings": {
-                        "path": f"/{path}",
-                        "host": "",
-                        "headers": {},
-                        "scMaxBufferedPosts": 30,
-                        "scMaxEachPostBytes": "1000000",
-                        "noSSEHeader": False,
-                        "xPaddingBytes": "100-1000",
-                        "mode": "auto"
+                        "shortIds": ["123abc"], # Retained original shortIds
+                        "fingerprint": "chrome" # Retained original fingerprint
                     }
                 },
                 "sniffing": {
@@ -127,15 +99,14 @@ def write_config(port1, port2, psk_b64, uuid_str, private_key, public_key, path)
     with open("/usr/local/etc/xray/config.json", "w") as f:
         json.dump(config, f, indent=2)
 
-def save_client_config(host_ip, port1, port2, psk_b64, uuid_str, public_key, path, country):
+def save_client_config(host_ip, port, uuid_str, public_key, country): # Modified to only take one port
     with open("/usr/local/etc/xray/config.txt", "w") as f:
-        f.write(f"ss://2022-blake3-aes-128-gcm:{psk_b64}@{host_ip}:{port1}#{country}\n\n")
-        f.write(f"{country} = ss, {host_ip}, {port1}, encrypt-method=2022-blake3-aes-128-gcm, password={psk_b64}, udp-relay=true\n\n")
-        vless = (
-            f"vless://{uuid_str}@{host_ip}:{port2}?encryption=none&security=reality&sni=www.tesla.com&"
-            f"fp=chrome&pbk={public_key}&sid=123abc&type=xhttp&path=%2F{path}&mode=auto#{country}\n"
+        vless_tcp_reality = (
+            f"vless-tcp-reality\n"
+            f"vless://{uuid_str}@{host_ip}:{port}?encryption=none&flow=xtls-rprx-vision&security=reality&sni=www.tesla.com&" # Retained original dest and serverNames for consistency
+            f"fp=chrome&pbk={public_key}&sid=123abc&type=tcp&headerType=none#{country}\n" # Retained original shortIds and fingerprint
         )
-        f.write(vless)
+        f.write(vless_tcp_reality)
 
 def cleanup():
     try:
@@ -152,23 +123,21 @@ def main():
     check_root()
     update_system()
 
-    port1, port2 = get_random_ports()
+    port = get_vless_tcp_port() # Get the fixed port
+
     install_xray()
 
-    path = os.urandom(6).hex()
     uuid_str = str(uuid.uuid4())
-
-    psk_b64 = subprocess.check_output(["openssl", "rand", "-base64", "16"]).decode().strip()
-
     private_key, public_key = generate_keys()
-    write_config(port1, port2, psk_b64, uuid_str, private_key, public_key, path)
+
+    write_config(port, uuid_str, private_key, public_key) # Pass only one port
 
     subprocess.run(["systemctl", "enable", "xray"])
     subprocess.run(["systemctl", "restart", "xray"])
 
     host_ip = get_host_ip()
     country = get_country(host_ip)
-    save_client_config(host_ip, port1, port2, psk_b64, uuid_str, public_key, path, country)
+    save_client_config(host_ip, port, uuid_str, public_key, country) # Pass only one port
 
     print("Xray 安装完成\n")
     with open("/usr/local/etc/xray/config.txt") as f:
