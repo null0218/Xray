@@ -11,7 +11,7 @@ RESET='\033[0m'
 
 # 函数用于安装 Xray
 install_vless_reality() {
-   bash <(curl -fsSL https://raw.githubusercontent.com/passeway/Xray/refs/heads/main/xray.sh)
+   bash <(curl -fsSL https://raw.githubusercontent.com/null0218/Xray/refs/heads/main/xray.sh)
 }
 
 # 函数用于更新 Xray
@@ -39,6 +39,7 @@ check_vless_reality_running() {
     if systemctl is-active --quiet xray; then
         return 0
     else
+      
         return 1
     fi
 }
