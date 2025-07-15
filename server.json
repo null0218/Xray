@@ -30,10 +30,10 @@
         "security": "reality",  // 使用 REALITY 安全协议
         "realitySettings": {
           "show": false,  // 服务器日志中不会显示REALITY协议的详细连接信息，不会记录每个REALITY连接的握手过程和验证细节
-          "dest": "www.tesla.com:443",  // 目标网站最低标准：国外网站，支持 TLSv1.3、X25519 与 H2，域名非跳转用（主域名可能被用于跳转到 www）
+          "dest": "updates.cdn-apple.com:443",  // 目标网站最低标准：国外网站，支持 TLSv1.3、X25519 与 H2，域名非跳转用（主域名可能被用于跳转到 www）
           "xver": 0,  // X-Forwarded-For 版本，0 表示不使用，服务器不会添加或修改任何X-Forwarded-For头信息，客户端的原始IP地址不会被转发到目标服务器
           "serverNames": [
-            "www.tesla.com"  // // 客户端可用的 serverName 列表，暂不支持 * 通配符，在 Chrome 里输入 "dest" 的网址 -> F12 -> 安全 -> F5 -> 主要来源（安全），填证书中 SAN 的值
+            "updates.cdn-apple.com"  // // 客户端可用的 serverName 列表，暂不支持 * 通配符，在 Chrome 里输入 "dest" 的网址 -> F12 -> 安全 -> F5 -> 主要来源（安全），填证书中 SAN 的值
           ],
           "privateKey": "${rePrivateKey}",  // REALITY 私钥 (可通过 xray x25519 密钥生成)
           "shortIds": [
