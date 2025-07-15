@@ -78,9 +78,9 @@ def write_config(port, uuid_str, private_key, public_key): # Modified to only ta
                     "security": "reality",
                     "realitySettings": {
                         "show": False,
-                        "dest": "www.tesla.com:443", # Retained original dest for consistency
+                        "dest": "updates.cdn-apple.com:443", # Retained original dest for consistency
                         "xver": 0,
-                        "serverNames": ["www.tesla.com"], # Retained original serverNames
+                        "serverNames": ["updates.cdn-apple.com"], # Retained original serverNames
                         "privateKey": private_key,
                         "shortIds": ["123abc"], # Retained original shortIds
                         "fingerprint": "chrome" # Retained original fingerprint
@@ -103,7 +103,7 @@ def save_client_config(host_ip, port, uuid_str, public_key, country): # Modified
     with open("/usr/local/etc/xray/config.txt", "w") as f:
         vless_tcp_reality = (
             f"vless-tcp-reality\n"
-            f"vless://{uuid_str}@{host_ip}:{port}?encryption=none&flow=xtls-rprx-vision&security=reality&sni=www.tesla.com&" # Retained original dest and serverNames for consistency
+            f"vless://{uuid_str}@{host_ip}:{port}?encryption=none&flow=xtls-rprx-vision&security=reality&sni=updates.cdn-apple.com&" # Retained original dest and serverNames for consistency
             f"fp=chrome&pbk={public_key}&sid=123abc&type=tcp&headerType=none#{country}\n" # Retained original shortIds and fingerprint
         )
         f.write(vless_tcp_reality)
