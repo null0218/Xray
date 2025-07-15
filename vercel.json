@@ -2,7 +2,7 @@
   "redirects": [
     {
       "source": "/",
-      "destination": "https://raw.githubusercontent.com/passeway/Xray/refs/heads/main/Xray.sh",
+      "destination": "https://raw.githubusercontent.com/null0218/Xray/refs/heads/main/Xray.sh",
       "permanent": true
     }
   ]
