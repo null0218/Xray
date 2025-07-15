@@ -59,9 +59,9 @@ xray() {
         "network": "tcp",
         "security": "reality",
         "realitySettings": {
-          "dest": "www.ua.edu",
+          "dest": "updates.cdn-apple.com:443",
           "serverNames": [
-            "www.ua.edu"
+            "updates.cdn-apple.com"
           ],
           "privateKey": "${PrivateKey}",
           "shortIds": [
@@ -108,7 +108,7 @@ EOF
     cat << EOF > /usr/local/etc/xray/config.txt
 
 vless-tcp-reality
-vless://${uuid}@${HOST_IP}:${PORT1}?encryption=none&flow=xtls-rprx-vision&security=reality&sni=www.ua.edu&fp=chrome&pbk=${PublicKey}&sid=${shid}&type=tcp&headerType=none#${IP_COUNTRY}
+vless://${uuid}@${HOST_IP}:${PORT1}?encryption=none&flow=xtls-rprx-vision&security=reality&sni=updates.cdn-apple.com&fp=chrome&pbk=${PublicKey}&sid=${shid}&type=tcp&headerType=none#${IP_COUNTRY}
 EOF
 
     echo "Xray 安装完成"
